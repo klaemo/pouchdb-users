@@ -1,42 +1,50 @@
-PouchDB Plugin Seed
+PouchDB Users Plugin
 =====
 
-[![Build Status](https://travis-ci.org/pouchdb/plugin-seed.svg)](https://travis-ci.org/pouchdb/plugin-seed)
+[![Build Status](https://travis-ci.org/klaemo/pouchdb-users.svg)](https://travis-ci.org/klaemo/pouchdb-users)
 
-Fork this project to build your first PouchDB plugin.  It contains everything you need to test in Node, WebSQL, and IndexedDB.  It also includes a Travis config file so you
-can automatically run the tests in Travis.
+This plugin aims to provide an implementation of CouchDB's `_users` database
+for PouchDB.
 
-Building
-----
-    npm install
-    npm run build
+Currently there is no session management, so the login method only fetches
+the user's document and compares the hashed (pbkdf2) passwords.
 
-Your plugin is now located at `dist/pouchdb.mypluginname.js` and `dist/pouchdb.mypluginname.min.js` and is ready for distribution.
+This plugin also doesn't enforce authentication or authorization. Even after
+you've created some users your PouchDB will still be in "Admin Party".
 
-Getting Started
--------
+Installation
+--------
 
-**First**, change the `name` in `package.json` to whatever you want to call your plugin.  Change the `build` script so that it writes to the desired filename (e.g. `pouchdb.mypluginname.js`).  Also, change the authors, description, git repo, etc.
+not quite there yet... ;)
 
-**Next**, modify the `index.js` to do whatever you want your plugin to do.  Right now it just adds a `pouch.sayHello()` function that says hello:
+Usage
+--------
 
-```js
-exports.sayHello = utils.toPromise(function (callback) {
-  callback(null, 'hello');
-});
+
+To use this plugin, include it after `pouchdb.js` in your HTML page:
+
+```html
+<script src="pouchdb.js"></script>
+<script src="pouchdb.users.js"></script>
 ```
 
-**Optionally**, you can add some tests in `tests/test.js`. These tests will be run both in the local database and a remote CouchDB, which is expected to be running at localhost:5984 in "Admin party" mode.
+Or to use it in Node.js, just npm install it:
 
-The sample test is:
+```
+npm install pouchdb-users
+```
+
+And then attach it to the `PouchDB` object:
 
 ```js
+var PouchDB = require('pouchdb');
+PouchDB.plugin(require('pouchdb-users'));
 
-it('should say hello', function () {
-  return db.sayHello().then(function (response) {
-    response.should.equal('hello');
-  });
-});
+// create a user with name and password
+new PouchDB('users').createUser(name, pass, function (err, res) {})
+
+// log in the user
+new PouchDB('users').login(name, pass, function (err, res) {})
 ```
 
 Testing
@@ -76,28 +84,3 @@ You can run e.g.
     CLIENT=selenium:phantomjs npm test
 
 This will run the tests automatically and the process will exit with a 0 or a 1 when it's done. Firefox uses IndexedDB, and PhantomJS uses WebSQL.
-
-What to tell your users
---------
-
-Below is some boilerplate you can use for when you want a real README for your users.
-
-To use this plugin, include it after `pouchdb.js` in your HTML page:
-
-```html
-<script src="pouchdb.js"></script>
-<script src="pouchdb.mypluginname.js"></script>
-```
-
-Or to use it in Node.js, just npm install it:
-
-```
-npm install pouchdb-myplugin
-```
-
-And then attach it to the `PouchDB` object:
-
-```js
-var PouchDB = require('pouchdb');
-PouchDB.plugin(require('pouchdb-myplugin'));
-```

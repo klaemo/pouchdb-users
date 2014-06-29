@@ -3,11 +3,8 @@
 
 var Pouch = require('pouchdb');
 
-//
-// your plugin goes here
-//
-var helloPlugin = require('../');
-Pouch.plugin(helloPlugin);
+var usersPlugin = require('../');
+Pouch.plugin(usersPlugin);
 
 var chai = require('chai');
 chai.use(require("chai-as-promised"));
@@ -39,13 +36,35 @@ function tests(dbName, dbType) {
     db = new Pouch(dbName);
     return db;
   });
+
   afterEach(function () {
     return Pouch.destroy(dbName);
   });
-  describe(dbType + ': hello test suite', function () {
-    it('should say hello', function () {
-      return db.sayHello().then(function (response) {
-        response.should.equal('hello');
+
+  describe(dbType + ': .createUser()', function () {
+    it('should create user', function () {
+      return db.createUser('foo', 'bar').then(function (res) {
+        res.ok.should.equal(true);
+        res.id.should.equal('org.couchdb.user:foo');
+      });
+    });
+  });
+
+  describe(dbType + ': .login()', function () {
+    it('should login user', function () {
+      return db.createUser('foo', 'bar').then(function () {
+        return db.login('foo', 'bar').then(function (res) {
+          res.ok.should.equal(true);
+          res.name.should.equal('foo');
+        });
+      });
+    });
+
+    it('should return error for wrong credentials', function () {
+      return db.createUser('foo', 'bar').then(function () {
+        return db.login('wrong', 'bar').catch(function (err) {
+          err.error.should.equal('unauthorized');
+        });
       });
     });
   });
